@@ -1,0 +1,51 @@
+# Knot DNS - Configuration maître caché
+# Généré automatiquement par Ansible
+
+server:
+  rundir: "/run/knot"
+  user: "knot:knot"
+  identity: "{{ inventory_hostname }}"
+
+listen:
+  - "{{ knot_master_ipv4 }}@53"
+  - "{{ knot_master_ipv6 }}@53"
+
+log:
+  - target: syslog
+    any: info
+
+key:
+  - id: "tsig-transfer"
+    algorithm: hmac-sha256
+    secret: "{{ tsig_secret }}"
+
+acl:
+  - id: "allow-transfer"
+    address:
+{% for ip in secondaries_transfer_ipv4 %}
+      - "{{ ip }}"
+{% endfor %}
+{% for ip in secondaries_transfer_ipv6 %}
+      - "{{ ip }}"
+{% endfor %}
+    key: "tsig-transfer"
+
+dnssec-policy:
+  - id: "policy-cg"
+    algorithm: ecdsap256sha256
+    dnskey-ttl: 3600
+    ksk-lifetime: 365d
+    zsk-lifetime: 90d
+    nsec3: on
+    nsec3-iterations: 0
+    nsec3-salt-length: 10
+
+zone:
+{% for z in dns_zones %}
+  - domain: "{{ z.name }}"
+    file: "/etc/knot/zones/{{ z.zonefile }}"
+    dnssec-signing: on
+    dnssec-policy: "policy-cg"
+    notify: [ "allow-transfer" ]
+    acl: [ "allow-transfer" ]
+{% endfor %}

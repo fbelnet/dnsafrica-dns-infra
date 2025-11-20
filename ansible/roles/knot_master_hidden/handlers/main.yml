@@ -1,0 +1,6 @@
+---
+- name: Redémarrer Knot
+  ansible.builtin.service:
+    name: knot
+    state: restarted
+  become: true

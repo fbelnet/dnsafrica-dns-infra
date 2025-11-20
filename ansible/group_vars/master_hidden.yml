@@ -1,0 +1,31 @@
+dns_role: "master_hidden"
+
+# Vos IPs d'administration
+admin_ipv4: "A REMPLIR"
+admin_ipv6: "A REMPLIR"
+
+# IPs du master caché (à remplir dès que le VPS sera créé)
+knot_master_ipv4: "A REMPLIR"
+knot_master_ipv6: "A REMPLIR"
+
+# IPs de vos serveurs secondaires
+secondaries_transfer_ipv4:
+  - "A REMPLIR"
+  - "A REMPLIR"
+  - "A REMPLIR"
+
+secondaries_transfer_ipv6:
+  - "A REMPLIR"
+  - "A REMPLIR"
+  - "A REMPLIR"
+
+# Secret TSIG (à générer plus tard)
+tsig_secret: "A REMPLIR"
+
+# Déclaration des zones
+dns_zones:
+  - name: ".cg"
+    zonefile: "cg.zone"
+
+# Optionnel : fichiers statiques
+dns_zone_files: []

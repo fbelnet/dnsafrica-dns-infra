@@ -1,0 +1,9 @@
+---
+- name: Configuration du serveur maître caché KnotDNS
+  hosts: master_hidden
+  become: true
+
+  roles:
+    - base_hardening
+    - firewall
+    - knot_master_hidden

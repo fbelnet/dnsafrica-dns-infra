@@ -1,0 +1,36 @@
+---
+- name: Installer Knot DNS (paquet officiel Debian)
+  ansible.builtin.apt:
+    name: knot
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Créer le répertoire des zones
+  ansible.builtin.file:
+    path: /etc/knot/zones
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Déployer la configuration Knot
+  ansible.builtin.template:
+    src: knot.conf.j2
+    dest: /etc/knot/knot.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Redémarrer Knot
+  become: true
+
+- name: Déployer les fichiers de zone statiques (si présents)
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/knot/zones/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ dns_zone_files | default([]) }}"
+  become: true
