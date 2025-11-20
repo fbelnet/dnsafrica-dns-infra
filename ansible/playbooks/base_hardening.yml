@@ -1,7 +1,8 @@
 ---
-- name: Durcissement de base des VPS DNSAfrica
+- name: Durcissement de base des VPS DNSAfrica (SSH + firewall)
   hosts: all_vps
   become: true
 
   roles:
     - base_hardening
+    - firewall

@@ -1,0 +1,43 @@
+---
+- name: Vérifier que l'on est sur un système de type Debian
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Debian"
+    fail_msg: "Ce rôle firewall est prévu pour Debian/Ubuntu uniquement."
+    success_msg: "Système Debian/Ubuntu détecté."
+
+- name: Installer nftables
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Déployer la configuration nftables pour le master caché
+  ansible.builtin.copy:
+    src: nftables-master.conf
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: "'master_hidden' in group_names"
+  notify: Redémarrer nftables
+  become: true
+
+- name: Déployer la configuration nftables pour les secondaires publics
+  ansible.builtin.copy:
+    src: nftables-secondary.conf
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: "'secondaries_public' in group_names"
+  notify: Redémarrer nftables
+  become: true
+
+- name: Activer et démarrer nftables
+  ansible.builtin.service:
+    name: nftables
+    state: started
+    enabled: true
+  become: true
