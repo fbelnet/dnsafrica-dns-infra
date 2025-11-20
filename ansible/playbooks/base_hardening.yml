@@ -1,0 +1,7 @@
+---
+- name: Durcissement de base des VPS DNSAfrica
+  hosts: all_vps
+  become: true
+
+  roles:
+    - base_hardening

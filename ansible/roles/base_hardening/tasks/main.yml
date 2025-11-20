@@ -1,0 +1,66 @@
+---
+- name: Vérifier que l'on est sur un système de type Debian
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Debian"
+    fail_msg: "Ce rôle base_hardening est prévu pour Debian/Ubuntu uniquement."
+    success_msg: "Système Debian/Ubuntu détecté."
+
+- name: Mettre à jour le cache APT
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: Installer les mises à jour de sécurité (upgrade minimal)
+  ansible.builtin.apt:
+    upgrade: safe
+  become: true
+
+- name: Installer les paquets de base (fail2ban, vim, htop, etc.)
+  ansible.builtin.apt:
+    name:
+      - fail2ban
+      - vim
+      - htop
+    state: present
+  become: true
+
+# --- Sécurisation SSH ---
+
+- name: S'assurer que le dossier sshd_config.d existe
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Déployer la configuration SSH durcie
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Port 50505
+      Protocol 2
+      PermitRootLogin no
+      PasswordAuthentication no
+      PubkeyAuthentication yes
+      ChallengeResponseAuthentication no
+      UsePAM yes
+      PermitEmptyPasswords no
+      X11Forwarding no
+      AllowTcpForwarding no
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+  notify: Redémarrer SSH
+  become: true
+
+- name: S'assurer que le service SSH est activé et démarré
+  ansible.builtin.service:
+    name: ssh
+    state: started
+    enabled: true
+  become: true

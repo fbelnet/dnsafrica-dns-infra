@@ -1,0 +1,13 @@
+---
+- name: Test simple sur la machine locale
+  hosts: local
+  gather_facts: false
+
+  tasks:
+    - name: Vérifier la connexion Ansible
+      ansible.builtin.ping:
+
+    - name: Créer un fichier de test
+      ansible.builtin.file:
+        path: /tmp/ansible_test_dnsafrica.txt
+        state: touch
